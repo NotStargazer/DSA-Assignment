@@ -5,9 +5,14 @@ Keep this concise and specific to your implementation.
 ## 1. Initial analysis
 
 - How are locations and connections represented in the baseline?
+  - Both Locations and Connections are represented as Unsorted Arrays, however when data is fetched from the WorldData it returns as
+  a ReadOnlyList.
 - Which operations appear frequent?
+  - Linear search appears the most frequent, appearing in both FindLocationById and FindOutgoingConnections.
 - Which operation(s) do you predict may scale poorly?
+  - Linear search on average has an time complexity of O(n) thus will scale poorly as the data set increases.
 - What will you investigate first?
+  - I will investigate how the world is stored and plan how to improve the efficiency of fetching data
 
 
 
