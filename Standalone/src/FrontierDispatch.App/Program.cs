@@ -49,7 +49,7 @@ static void RunBaseline()
 
     Console.WriteLine("Baseline world-query workload");
     Console.WriteLine($"Locations: {world.Locations.Count}");
-    Console.WriteLine($"Connections: {world.Connections.Count}");
+    Console.WriteLine($"Connections: {world.ConnectionCount}");
     Console.WriteLine($"Iterations: {iterations}");
     Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds} ms");
     Console.WriteLine($"Checksum: {checksum}");

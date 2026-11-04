@@ -14,14 +14,25 @@ Keep this concise and specific to your implementation.
 - What will you investigate first?
   - I will investigate how the world is stored and plan how to improve the efficiency of fetching data
 
-
-
-
-
-
 ## 2. Data representation
 
 Describe important changes/retained choices, operations affected, and time/memory trade-offs.
+
+> ### WorldData.cs
+> Storing Nodes as a lists is requiring the program to search each object in the list in order to find a spesific
+node. Similarly, when we want to find a connection to an outgoing node we find that we need to perform another linear
+search on the connections list. I plan to improve the lookup of nodes and connections in the following ways:
+> - Change the list of nodes to a dictionary 
+>   - This changes the average lookup time complexity from O(n) to O(1)
+>   - incurs miniscule additional cost to memory per data point.
+>   - Lookups for non ID data points, such as cost, may incur a performance hit.
+> - Change the list of connections to instead have a dictionary with lists in it with the outgoing connections.
+>   - Given that connections have the same lookup operation as nodes. Placing all the outgoing connections in a
+>   dictionary allows us to find each outgoing connection at O(n) time using only one lookup.
+>   - The trade-off for this is that creating new connections requires a lookup for the corresponding 'from' node 
+>   before adding an outgoing connection.
+>   - Putting lists on the nodes incours a miniscule overhead in memory, but the amount of data being stored remains
+>   the same.
 
 ## 3. Algorithms and adaptation
 
