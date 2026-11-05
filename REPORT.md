@@ -54,19 +54,47 @@ Explain your route finder at a useful high level and how the travel-budget query
 
 Important tests/edge cases and what they demonstrate.
 
-
+> ### Priority Queue
+> I felt it important that the priority queue maintains it's order regardless of how many random elements I insert. 
+> I added a test to ensure that the priority remains in tact as they exit the queue.
 
 ## 6. Performance investigation
 
 Record reproducible before/after measurements for loading/preparation, repeated runtime work, and relevant allocation behavior. Explain what changed and why.
 
+> ### World Data
+> Dictionary Lookup significatly improved the lookup time for relevant world data.
+> 
+> Linear Search
+> ```json
+> Locations: 2500
+> Connections: 9800
+> Iterations: 5000
+> Elapsed: 449 ms
+> ```
+> Dictionary Lookup
+> ```json
+> Locations: 2500
+> Connections: 9800
+> Iterations: 5000
+> Elapsed: 0 ms (~4500 ticks)
+> ```
+
 ## 7. Development reflection
 
 Describe one bug, wrong assumption, failed approach, or surprising result and how you investigated it.
 
+> ### World Data
+> I initially tried to add the outgoing connections on the nodes themselves. However, when trying to add connections. 
+> I realised I would have to break encapsulation of the node and world data and allowed others to add connections to
+> what was supposed to be a complete set of data. I backtracked a bit and decided to place the data as seperate lists
+> a dictionary instead.
+
 ## 8. Tools and AI assistance
 
 Briefly describe relevant assistance, if any.
+> I don't believe in AI as a learning tool. The most I used it was to describe unfamiliar terms to me that I couldn't
+> find a consice explanation on in either wikipedia or other websites.
 
 ## 9. VG extension
 
