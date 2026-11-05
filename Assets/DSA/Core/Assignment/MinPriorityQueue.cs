@@ -30,8 +30,17 @@ namespace FrontierDispatch.Core
         /// </summary>
         public void Enqueue(T item, int priority)
         {
-            // TODO: insert the new entry and restore the min-heap invariant.
-            throw new NotImplementedException();
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            var i = Count;
+            _heap.Add(new Entry(item, priority));
+            if (Count > 1)
+            {
+                SiftDown(i);
+            }
         }
 
         /// <summary>
@@ -42,8 +51,12 @@ namespace FrontierDispatch.Core
         /// </exception>
         public T Peek()
         {
-            // TODO: return the current minimum without changing the queue.
-            throw new NotImplementedException();
+            if (Count == 0)
+            {
+                throw new InvalidOperationException("Queue is empty");
+            }
+
+            return _heap[0].Item;
         }
 
         /// <summary>
@@ -54,8 +67,23 @@ namespace FrontierDispatch.Core
         /// </exception>
         public T Dequeue()
         {
-            // TODO: remove the minimum item and restore the min-heap invariant.
-            throw new NotImplementedException();
+            if (Count == 0)
+            {
+                throw new InvalidOperationException("Queue is empty");
+            }
+
+            var item = _heap[0].Item;
+            if (Count == 1)
+            {
+                _heap.RemoveAt(0);
+                return item;
+            }
+            
+            var maxIndex = Count - 1;
+            (_heap[0], _heap[maxIndex]) = (_heap[maxIndex], _heap[0]);
+            _heap.RemoveAt(maxIndex);
+            SiftUp(0);
+            return item;
         }
 
         /// <summary>
@@ -71,6 +99,54 @@ namespace FrontierDispatch.Core
 
             public T Item { get; }
             public int Priority { get; }
+        }
+        
+        private int ParentIndex(int index) => (index - 1) / 2;
+        private int LeftIndex(int index) => index * 2 + 1;
+        private int RightIndex(int index) => index * 2 + 2;
+        
+        private void Swap(int a, int b)
+        {
+            (_heap[a], _heap[b]) = (_heap[b], _heap[a]);
+        }
+
+        private void SiftDown(int i)
+        {
+            var priority = _heap[i].Priority;
+            var pi = ParentIndex(i);
+            while (priority < _heap[pi].Priority)
+            {
+                Swap(i, pi);
+                i = pi;
+                pi = ParentIndex(i);
+            }
+        }
+
+        private void SiftUp(int i)
+        {
+            var priority = _heap[i].Priority;
+            var li = LeftIndex(i);
+            var ri = RightIndex(i);
+            while (ri < Count)
+            {
+                var swap = _heap[li].Priority < _heap[ri].Priority ? li : ri;
+                if (priority < _heap[swap].Priority)
+                {
+                    return;
+                }
+                Swap(i, swap);
+                i = swap;
+                li = LeftIndex(i);
+                ri = RightIndex(i);
+            }
+
+            if (li < Count)
+            {
+                if (_heap[li].Priority < priority)
+                {
+                    Swap(i, li);
+                }
+            }
         }
     }
 }

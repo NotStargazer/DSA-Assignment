@@ -18,7 +18,7 @@ Keep this concise and specific to your implementation.
 
 Describe important changes/retained choices, operations affected, and time/memory trade-offs.
 
-> ### WorldData.cs
+> ### World Data
 > Storing Nodes as a lists is requiring the program to search each object in the list in order to find a spesific
 node. Similarly, when we want to find a connection to an outgoing node we find that we need to perform another linear
 search on the connections list. I plan to improve the lookup of nodes and connections in the following ways:
@@ -38,19 +38,23 @@ search on the connections list. I plan to improve the lookup of nodes and connec
 
 Explain your route finder at a useful high level and how the travel-budget query adapts the same ideas.
 
+
+
 ## 4. Complexity
 
 | Operation | Your representation/algorithm | Complexity | Short explanation |
 | --- |-------------------------------| --- | --- |
-| Find location by ID |                               | | |
-| Get outgoing connections |                               | | |
-| Priority queue enqueue |                               | | |
-| Priority queue dequeue-min |                               | | |
+| Find location by ID | Dictionary Lookup | O(1) | Using the ID as a hashed key we can very quickly find the correct node |
+| Get outgoing connections | Dictionary Lookup | O(1) | For the same reason as Finding Location, we can return an array of outgoing connections |
+| Priority queue enqueue | Insert at top, sift toward the root | O(log n) | Searches up the tree to find position in heap branch |
+| Priority queue dequeue-min | Swap last and root, sift towards leaves | O(log n) | Swaps the top to maintain invarience, Searches down the tree to find position of swapped entry |
 | Route finding |                               | | |
 
 ## 5. Correctness and testing
 
 Important tests/edge cases and what they demonstrate.
+
+
 
 ## 6. Performance investigation
 

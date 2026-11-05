@@ -16,7 +16,7 @@ namespace FrontierDispatch.Tests
         // These tests document later assignment contracts without making the
         // untouched baseline red. Remove Ignore when you reach the named phase.
 
-        [Test, Ignore("Phase 3: enable when implementing the binary min-heap priority queue.")]
+        [Test]
         public void PriorityQueue_EnqueueAndDequeue_ReturnsLowestPriorityFirst()
         {
             var queue = new MinPriorityQueue<string>();
@@ -24,6 +24,44 @@ namespace FrontierDispatch.Tests
             queue.Enqueue("cheap", 2);
             queue.Enqueue("medium", 5);
             Assert.That(queue.Dequeue(), Is.EqualTo("cheap"));
+        }
+        
+        [Test]
+        public void PriorityQueue_EnqueueAndDequeue_ReturnsCorrectOrder()
+        {
+            var queue = new MinPriorityQueue<string>();
+            queue.Enqueue("expensive", 9);
+            queue.Enqueue("cheap", 2);
+            queue.Enqueue("medium", 5);
+            queue.Enqueue("very expensive", 20);
+            queue.Enqueue("somewhat cheap", 3);
+
+            var dequeued = new string[queue.Count];
+            for (var i = 0; i < dequeued.Length; i++)
+            {
+                dequeued[i] = queue.Dequeue();
+            }
+            
+            Assert.That(dequeued, 
+                Is.EqualTo(
+                    ["cheap", "somewhat cheap", "medium", "expensive", "very expensive"]));
+        }
+        
+        [Test]
+        public void PriorityQueue_EnqueueAndDequeue_HandlesSingleElement()
+        {
+            var queue = new MinPriorityQueue<int>();
+            queue.Enqueue(1, 9);
+            
+            Assert.That(queue.Dequeue(), Is.EqualTo(1));
+        }
+        
+        [Test]
+        public void PriorityQueue_EnqueueAndDequeue_ThrowsWhenEmpty()
+        {
+            var queue = new MinPriorityQueue<int>();
+            Assert.Throws<InvalidOperationException>(() => { queue.Dequeue(); });
+            Assert.Throws<InvalidOperationException>(() => { queue.Peek(); });
         }
 
         [Test, Ignore("Phase 4: enable when implementing Dijkstra route finding.")]
