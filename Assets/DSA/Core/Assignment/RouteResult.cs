@@ -8,7 +8,7 @@ namespace FrontierDispatch.Core
     /// </summary>
     public sealed class RouteResult
     {
-        public RouteResult(bool found, IReadOnlyList<int> locationIds, int totalCost, int expandedCount)
+        public RouteResult(bool found, IReadOnlyList<int>? locationIds, int totalCost, int expandedCount)
         {
             Found = found;
             LocationIds = locationIds ?? throw new ArgumentNullException(nameof(locationIds));
@@ -39,5 +39,10 @@ namespace FrontierDispatch.Core
         /// of wall-clock timing.
         /// </summary>
         public int ExpandedCount { get; }
+
+        public static RouteResult NotFound(int expandedCount) => 
+            new RouteResult(false, null, int.MaxValue, expandedCount);
+        public static RouteResult Success(IReadOnlyList<int> route, int expandedCount, int totalCost) => 
+            new RouteResult(true, route, totalCost, expandedCount);
     }
 }

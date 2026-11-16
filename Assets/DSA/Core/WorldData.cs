@@ -28,8 +28,15 @@ namespace FrontierDispatch.Core
         }
 
         public IReadOnlyDictionary<int, Location> Locations => _locations;
-        public IReadOnlyList<Connection>? GetOutgoingConnections(int fromLocationId) => _connections.GetValueOrDefault(fromLocationId);
+        public IReadOnlyList<Connection> GetOutgoingConnections(int fromLocationId) => _connections[fromLocationId];
+        public bool HasLocation(int locationId) => _locations.ContainsKey(locationId);
         public int ConnectionCount { get; }
 
+        public float DistanceBetween(int locationIdA, int locationIdB)
+        {
+            var a = Locations[locationIdA].Position;
+            var b = Locations[locationIdB].Position;
+            return MathF.Sqrt(a.X * b.X + a.Y * b.Y);
+        }
     }
 }
