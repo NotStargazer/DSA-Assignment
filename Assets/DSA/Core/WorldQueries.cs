@@ -29,7 +29,7 @@ namespace FrontierDispatch.Core
             return _world.Locations.GetValueOrDefault(id);
         }
 
-        public IReadOnlyList<Connection>? FindOutgoingConnections(int fromLocationId)
+        public IReadOnlyList<Connection> FindOutgoingConnections(int fromLocationId)
         {
             return _world.GetOutgoingConnections(fromLocationId);
         }
