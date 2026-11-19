@@ -17,7 +17,17 @@ namespace FrontierDispatch.Core
     {
         // The list stores the physical representation of the binary heap.
         // Your implementation is responsible for preserving the min-heap invariant.
-        private readonly List<Entry> _heap = new List<Entry>();
+        private readonly List<Entry> _heap;
+
+        public MinPriorityQueue(int capacity)
+        {
+            _heap = new List<Entry>(capacity);
+        }
+
+        public MinPriorityQueue()
+        {
+            _heap = new List<Entry>();
+        }
 
         /// <summary>
         /// Number of items currently stored in the queue.

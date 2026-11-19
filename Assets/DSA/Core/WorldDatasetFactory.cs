@@ -36,7 +36,8 @@ namespace FrontierDispatch.Core
         /// </summary>
         public static WorldData CreateGrid(int width, int height)
         {
-            var locations = new List<Location>(width * height);
+            var worldSize = width * height;
+            var locations = new List<Location>(worldSize);
             var connections = new List<Connection>();
 
             // Locations use a stable row-major ID, i.e. the first row is 0..width-1, the second row is width..2*width-1, etc.
@@ -47,17 +48,6 @@ namespace FrontierDispatch.Core
                 {
                     int id = y * width + x;
                     locations.Add(new Location(id, $"Outpost {id}", new WorldPosition(x, y), "Outpost"));
-                }
-            }
-
-            // Store each road direction as its own Connection.
-            // Only right/down neighbours are considered here because
-            // AddBidirectional creates both directed connections.
-            for (int y = 0; y < height; ++y)
-            {
-                for (int x = 0; x < width; ++x)
-                {
-                    int id = y * width + x;
                     if (x + 1 < width) AddBidirectional(connections, id, id + 1, Cost(id, id + 1));
                     if (y + 1 < height) AddBidirectional(connections, id, id + width, Cost(id, id + width));
                 }

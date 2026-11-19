@@ -10,6 +10,7 @@ if (args.Length > 0 && args[0] == "--baseline")
 
 if (args.Length > 0 && args[0] == "--pf")
 {
+    WorldCreationMetrics();
     RunDijkstra();
     RunAStar();
     return;
@@ -63,32 +64,38 @@ static void RunBaseline()
     Console.WriteLine("Absolute time varies by machine. Keep this result for before/after comparison.");
 }
 
+static void WorldCreationMetrics()
+{
+    var sw = Stopwatch.StartNew();
+    var largeWorld = WorldDatasetFactory.CreateLarge();
+    sw.Stop();
+    var bytes = GC.GetAllocatedBytesForCurrentThread();
+    
+    Console.WriteLine("Large World Creation Metrics");
+    Console.WriteLine($"Creation Time: {sw.Elapsed.TotalMilliseconds} ms");
+    Console.WriteLine($"Size: {bytes} bytes");
+    Console.WriteLine("-----------------------------------------------------------");
+}
+
 static void RunDijkstra()
 {
     var smallWorld = WorldDatasetFactory.CreateSmall();
     var mediumWorld = WorldDatasetFactory.CreateMedium();
     var largeWorld = WorldDatasetFactory.CreateLarge();
-    var smallRand = new Random(1337);
-    var mediumRand = new Random(1337);
-    var largeRand = new Random(1337);
     
-    var checksum = 0;
     const int iterations = 100;
     var sw = Stopwatch.StartNew();
-    var smallDijkstra = new DijkstraRouteFinder(smallWorld);
-    var smallResult = IterateWorldDataDijkstra(smallRand, smallWorld, smallDijkstra, iterations);
+    var smallResult = IterateWorldDataDijkstra(smallWorld, iterations);
     sw.Stop();
-    var smallElapsed = sw.Elapsed.TotalMilliseconds;
+    var smallElapsed = sw.ElapsedMilliseconds;
     sw.Restart();
-    var mediumDijkstra = new DijkstraRouteFinder(mediumWorld);
-    var mediumResult = IterateWorldDataDijkstra(mediumRand, mediumWorld, mediumDijkstra, iterations);
+    var mediumResult = IterateWorldDataDijkstra(mediumWorld, iterations);
     sw.Stop();
-    var mediumElapsed = sw.Elapsed.TotalMilliseconds;
+    var mediumElapsed = sw.ElapsedMilliseconds;
     sw.Restart();
-    var largeDijkstra = new DijkstraRouteFinder(largeWorld);
-    var largeResult = IterateWorldDataDijkstra(largeRand, largeWorld, largeDijkstra, iterations);
+    var largeResult = IterateWorldDataDijkstra(largeWorld, iterations);
     sw.Stop();
-    var largeElapsed = sw.Elapsed.TotalMilliseconds;
+    var largeElapsed = sw.ElapsedMilliseconds;
     
     Console.WriteLine("Dijkstra performance metrics");
     Console.WriteLine("-----------------------------------------------------------");
@@ -97,7 +104,7 @@ static void RunDijkstra()
     Console.WriteLine("               | Small World | Medium World | Large World |");
     Console.WriteLine($"Locations      | {smallWorld.Locations.Count,-11} | {mediumWorld.Locations.Count,-12} | {largeWorld.Locations.Count,-11} |");
     Console.WriteLine($"Connections    | {smallWorld.ConnectionCount,-11} | {mediumWorld.ConnectionCount,-12} | {largeWorld.ConnectionCount,-11} |");
-    Console.WriteLine($"Expanded Nodes | {smallResult.TotalExpandedNodes,-11} | {mediumResult.TotalExpandedNodes,-12} | {largeResult.TotalExpandedNodes,-11} |");
+    Console.WriteLine($"Avg. Expanded  | {smallResult.AverageExpandedNodes,-11} | {mediumResult.AverageExpandedNodes,-12} | {largeResult.AverageExpandedNodes,-11} |");
     Console.WriteLine($"Total Cost     | {smallResult.TotalCost,-11} | {mediumResult.TotalCost,-12} | {largeResult.TotalCost,-11} |");
     Console.WriteLine($"Elapsed Time   | {smallElapsed,-8} ms | {mediumElapsed,-9} ms | {largeElapsed,-8} ms |");
     Console.WriteLine("-----------------------------------------------------------");
@@ -108,27 +115,20 @@ static void RunAStar()
     var smallWorld = WorldDatasetFactory.CreateSmall();
     var mediumWorld = WorldDatasetFactory.CreateMedium();
     var largeWorld = WorldDatasetFactory.CreateLarge();
-    var smallRand = new Random(1337);
-    var mediumRand = new Random(1337);
-    var largeRand = new Random(1337);
     
-    var checksum = 0;
     const int iterations = 100;
     var sw = Stopwatch.StartNew();
-    var smallAStar = new AStarRouteFinder(smallWorld);
-    var smallResult = IterateWorldDataAStar(smallRand, smallWorld, smallAStar, iterations);
+    var smallResult = IterateWorldDataAStar(smallWorld, iterations);
     sw.Stop();
-    var smallElapsed = sw.Elapsed.TotalMilliseconds;
+    var smallElapsed = sw.ElapsedMilliseconds;
     sw.Restart();
-    var mediumAStar = new AStarRouteFinder(mediumWorld);
-    var mediumResult = IterateWorldDataAStar(mediumRand, mediumWorld, mediumAStar, iterations);
+    var mediumResult = IterateWorldDataAStar(mediumWorld, iterations);
     sw.Stop();
-    var mediumElapsed = sw.Elapsed.TotalMilliseconds;
+    var mediumElapsed = sw.ElapsedMilliseconds;
     sw.Restart();
-    var largeAStar = new AStarRouteFinder(largeWorld);
-    var largeResult = IterateWorldDataAStar(largeRand, largeWorld, largeAStar, iterations);
+    var largeResult = IterateWorldDataAStar(largeWorld, iterations);
     sw.Stop();
-    var largeElapsed = sw.Elapsed.TotalMilliseconds;
+    var largeElapsed = sw.ElapsedMilliseconds;
     
     Console.WriteLine("A-Star performance metrics");
     Console.WriteLine("-----------------------------------------------------------");
@@ -137,16 +137,18 @@ static void RunAStar()
     Console.WriteLine("               | Small World | Medium World | Large World |");
     Console.WriteLine($"Locations      | {smallWorld.Locations.Count,-11} | {mediumWorld.Locations.Count,-12} | {largeWorld.Locations.Count,-11} |");
     Console.WriteLine($"Connections    | {smallWorld.ConnectionCount,-11} | {mediumWorld.ConnectionCount,-12} | {largeWorld.ConnectionCount,-11} |");
-    Console.WriteLine($"Expanded Nodes | {smallResult.TotalExpandedNodes,-11} | {mediumResult.TotalExpandedNodes,-12} | {largeResult.TotalExpandedNodes,-11} |");
-    Console.WriteLine($"Relaxed Nodes  | {smallResult.TotalRelaxedNodes,-11} | {mediumResult.TotalRelaxedNodes,-12} | {largeResult.TotalRelaxedNodes,-11} |");
-    Console.WriteLine($"Total Nodes    | {smallResult.TotalRelaxedNodes + smallResult.TotalExpandedNodes,-11} | {mediumResult.TotalRelaxedNodes + mediumResult.TotalExpandedNodes,-12} | {largeResult.TotalRelaxedNodes + largeResult.TotalExpandedNodes,-11} |");
+    Console.WriteLine($"Avg. Expanded  | {smallResult.AverageExpandedNodes,-11} | {mediumResult.AverageExpandedNodes,-12} | {largeResult.AverageExpandedNodes,-11} |");
+    Console.WriteLine($"Avg. Relaxed   | {smallResult.AverageRelaxedNodes,-11} | {mediumResult.AverageRelaxedNodes,-12} | {largeResult.AverageRelaxedNodes,-11} |");
+    Console.WriteLine($"Avg. Checked   | {smallResult.AverageRelaxedNodes + smallResult.AverageExpandedNodes,-11} | {mediumResult.AverageRelaxedNodes + mediumResult.AverageExpandedNodes,-12} | {largeResult.AverageRelaxedNodes + largeResult.AverageExpandedNodes,-11} |");
     Console.WriteLine($"Total Cost     | {smallResult.TotalCost,-11} | {mediumResult.TotalCost,-12} | {largeResult.TotalCost,-11} |");
     Console.WriteLine($"Elapsed Time   | {smallElapsed,-8} ms | {mediumElapsed,-9} ms | {largeElapsed,-8} ms |");
     Console.WriteLine("-----------------------------------------------------------");
 }
 
-static PathfindingMetrics IterateWorldDataDijkstra(Random rand, WorldData world, DijkstraRouteFinder pathFinder, int iterations)
+static PathfindingMetrics IterateWorldDataDijkstra(WorldData world, int iterations)
 {
+    var rand = new Random(1337);
+    var pathFinder = new DijkstraRouteFinder(world);
     var checksum = 0;
     var totalExpandedNodes = 0;
     var totalCost = 0;
@@ -162,11 +164,13 @@ static PathfindingMetrics IterateWorldDataDijkstra(Random rand, WorldData world,
             totalCost += result.TotalCost;
         }
     }
-    return new PathfindingMetrics(totalExpandedNodes, totalCost, checksum);
+    return new PathfindingMetrics(iterations, totalExpandedNodes, totalCost, checksum);
 }
 
-static PathfindingMetrics IterateWorldDataAStar(Random rand, WorldData world, AStarRouteFinder pathFinder, int iterations)
+static PathfindingMetrics IterateWorldDataAStar(WorldData world, int iterations)
 {
+    var rand = new Random(1337);
+    var pathFinder = new AStarRouteFinder(world);
     var checksum = 0;
     var totalExpandedNodes = 0;
     var totalRelaxedNodes = 0;
@@ -184,13 +188,13 @@ static PathfindingMetrics IterateWorldDataAStar(Random rand, WorldData world, AS
             totalCost += result.TotalCost;
         }
     }
-    return new PathfindingMetrics(totalExpandedNodes, totalCost, checksum, totalRelaxedNodes);
+    return new PathfindingMetrics(iterations, totalExpandedNodes, totalCost, checksum, totalRelaxedNodes);
 }
 
-readonly struct PathfindingMetrics(int totalExpandedNodes, int totalCost, int checkSum, int totalRelaxedNodes = 0)
+readonly struct PathfindingMetrics(int iterations, int totalExpandedNodes, int totalCost, int checkSum, int totalRelaxedNodes = 0)
 {
-    public int TotalExpandedNodes { get; } = totalExpandedNodes;
-    public int TotalRelaxedNodes { get; } = totalRelaxedNodes;
+    public int AverageExpandedNodes { get; } = totalExpandedNodes / iterations;
+    public int AverageRelaxedNodes { get; } = totalRelaxedNodes / iterations;
     public int TotalCost { get; } = totalCost;
     public int CheckSum { get; } = checkSum;
 }

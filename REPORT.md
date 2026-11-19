@@ -42,20 +42,27 @@ Explain your route finder at a useful high level and how the travel-budget query
 > - Assign a Min Priority Queue and Enqueue the starting node with a priority of 0.
 > - Assign a map that links the lowest cost route back to their parents.
 > - Begin a loop that breaks there are no nodes left to check:
->   - Take the lowest F-Cost node from the priority queue. 
+>   - Take the lowest F-Cost node from the priority queue.
+>   - If the G-Cost of this check is greater than the existing node, we skip this node.
 >   - Check if the current node is our goal node.
 >     - If it is our goal node, reconstruct the route and return a success.
 >   - Search each neighboring node of the current node and calculate their corresponding G-Costs.
+>   - Check if the node is in the block list and skip if it is.
 >   - If the G-Cost of the neighboring node is unassigned or less then the current cost. Replace the G-Cost and assign the parent node to the route map.
 >   - Calculate the F-Cost of the neighboring node using the G-Cost + the distance to the goal node.
->   - Use the F-Cost as a priority and add the node to the Priority Queue
+>   - Use the F-Cost as a priority and add the node to the Priority Queue and also assign the G-Cost of the node as it was added to check for relaxation later.
 >   - If it already exists in the queue then reassign the priority of that node.
 > - If the goal node is never found, return a failure.
 > 
 > **Reconstructing the Route**<br>
 > - Create a new list and add the goal node to it.
 > - Loop through the route map and trace the nodes back to the start node from the goal node. Add the nodes to the list as it does.
-> - 
+> - Add the start node and reverse the list.
+>
+> **Adaptation for travel-budget.**<br>
+> - When adapting to the travel-budget query. The only change we need to make is skipping nodes that are outside the travel-budget.
+> - Eventually the frontier will run out of nodes to check outside the travel budget or will find all nodes.
+> - Once we do that we can simply return the G-Cost map.
 
 ## 4. Complexity
 
@@ -82,7 +89,7 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 
 > ### World Data
 > Dictionary Lookup significantly improved the lookup time for relevant world data.
-> 
+>
 > Linear Search
 > ```json
 > Locations: 2500
@@ -97,7 +104,31 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 > Iterations: 5000
 > Elapsed: 0 ms (~4500 ticks)
 > ```
-
+> ### Path Finding Differences
+> 
+> Dijkstra performance metrics<br>
+> **Iterations Per World: 100 \| Checksum: 2210999**
+> | World Size | Small World | Medium World | Large World |
+> |---------------|--------------|-------------|------------|
+> | Locations   | 25 | 2500 | 40000 |
+> | Connections| 80 | 9800 | 159200 |
+> | Avg. Expanded| 11 | 1265 | 20079 |
+> | Total Cost| 1379 | 14958 | 58957 |
+> | Elapsed Time| 2 ms | 34 ms | 855 ms |
+> 
+> A-Star performance metrics<br>
+> **Iterations Per World: 100 \| Checksum: 1711324**
+> | World Size | Small World | Medium World | Large World |
+> |---------------|--------------|-------------|------------|
+>| Locations| 25          | 2500         | 40000       |
+>| Connections| 80          | 9800         | 159200      |
+>| Avg. Expanded| 9           | 983          | 15366       |
+>| Avg. Relaxed| 0           | 49           | 1617        |
+>| Avg. Checked| 9           | 1032         | 16983       |
+>| Total Cost| 1379        | 14964        | 58963       |
+>| Elapsed Time| 2        ms | 44        ms | 638      ms |
+> 
+> I've been sitting and racking my brain over why the performance metrics for A* and Dijkstra seem to not want to vary. The amount of expanded nodes seems to evaluate to A* being correct, ergo on average O(|V|log|E|) but the difference in performance seems to be on average only a tiny bit slower. Despite the total checked nodes being significantly lower.
 ## 7. Development reflection
 
 Describe one bug, wrong assumption, failed approach, or surprising result and how you investigated it.

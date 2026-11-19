@@ -43,7 +43,7 @@ namespace FrontierDispatch.Core
         public AStarRouteFinder(WorldData world)
         {
             _world = world ?? throw new ArgumentNullException(nameof(world));
-            _frontier = new MinPriorityQueue<FrontierEntry>();
+            _frontier = new MinPriorityQueue<FrontierEntry>(_world.ConnectionCount);
             _bestCost = new Dictionary<int, int>(_world.ConnectionCount);
             _cameFrom = new Dictionary<int, int>(_world.ConnectionCount);
         }
@@ -72,7 +72,7 @@ namespace FrontierDispatch.Core
             {
                 var next = _frontier.Dequeue();
                 var currentId = next.Id;
-                if (next.GCost > _bestCost[currentId] || skipNodes != null && skipNodes.Contains(currentId))
+                if (next.GCost > _bestCost[currentId])
                 {
                     relaxedNodes++;
                     continue;
@@ -94,6 +94,11 @@ namespace FrontierDispatch.Core
                     var hasVal = _bestCost.TryGetValue(to, out var known);
                     if (!hasVal || gCost < known)
                     {
+                        if (skipNodes != null && skipNodes.Contains(to))
+                        {
+                            continue;
+                        }
+                        
                         _bestCost[connection.ToLocationId] = gCost;
                         _cameFrom[connection.ToLocationId] = currentId;
                         var fCost = g + _world.DistanceBetween(connection.ToLocationId, goalLocationId);

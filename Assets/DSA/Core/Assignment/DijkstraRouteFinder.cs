@@ -26,7 +26,7 @@ namespace FrontierDispatch.Core
         public DijkstraRouteFinder(WorldData world)
         {
             _world = world ?? throw new ArgumentNullException(nameof(world));
-            _frontier = new MinPriorityQueue<int>();
+            _frontier = new MinPriorityQueue<int>(_world.ConnectionCount);
             _bestCost = new Dictionary<int, int>(_world.ConnectionCount);
             _cameFrom = new Dictionary<int, int>(_world.ConnectionCount);
         }
