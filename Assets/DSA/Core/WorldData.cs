@@ -36,7 +36,8 @@ namespace FrontierDispatch.Core
         {
             var a = Locations[locationIdA].Position;
             var b = Locations[locationIdB].Position;
-            return MathF.Sqrt(a.X * b.X + a.Y * b.Y);
+
+            return Math.Abs(a.X - b.X) + MathF.Abs(a.Y - b.Y);
         }
     }
 }

@@ -3,36 +3,54 @@ using System.Collections.Generic;
 
 namespace FrontierDispatch.Core
 {
-    // Assignment Phase 4.
+    public readonly struct FrontierEntry : IComparable
+    {
+        public FrontierEntry(int id, int gCost)
+        {
+            Id = id;
+            GCost = gCost;
+        }
 
-    /// <summary>
-    /// Finds minimum-total-cost routes through a Frontier Dispatch world
-    /// using Dijkstra's shortest-path algorithm.
-    ///
-    /// This class is intentionally incomplete in the assignment starter.
-    /// It should eventually use the student's prepared world representation
-    /// and MinPriorityQueue implementation.
-    /// </summary>
+        public int Id { get; }
+        public int GCost { get; }
+
+        public int CompareTo(object obj)
+        {
+            if (obj is FrontierEntry fe)
+            {
+                if (Id > fe.Id)
+                {
+                    return 1;
+                }
+
+                if (Id < fe.Id)
+                {
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+    }
+
     public sealed class AStarRouteFinder
     {
         private readonly WorldData _world;
-
-        /// <summary>
-        /// Constructor. Creates a route finder operating on the supplied world.
-        /// </summary>
+        private readonly MinPriorityQueue<FrontierEntry> _frontier;
+        private readonly Dictionary<int, int> _bestCost;
+        private readonly Dictionary<int, int> _cameFrom;
+        private readonly HashSet<int> _checked;
+        
         public AStarRouteFinder(WorldData world)
         {
             _world = world ?? throw new ArgumentNullException(nameof(world));
+            _frontier = new MinPriorityQueue<FrontierEntry>();
+            _bestCost = new Dictionary<int, int>(_world.ConnectionCount);
+            _cameFrom = new Dictionary<int, int>(_world.ConnectionCount);
+            _checked = new HashSet<int>();
         }
-
-        /// <summary>
-        /// Finds a minimum-total-travel-cost route from the start location
-        /// to the goal location.
-        ///
-        /// A successful RouteResult should contain the route as location IDs,
-        /// including both the start and goal locations.
-        /// </summary>
-        public RouteResult FindRoute(int startLocationId, int goalLocationId)
+        
+        public RouteResult FindRoute(int startLocationId, int goalLocationId, HashSet<int>? skipNodes = null)
         {
             if (!_world.HasLocation(startLocationId) || !_world.HasLocation(goalLocationId))
             {
@@ -45,40 +63,43 @@ namespace FrontierDispatch.Core
             }
 
             var expandedNodes = 0;
-            var frontier = new HashedPriorityMinQueue<int>();
-            frontier.Enqueue(startLocationId, 0);
-            var bestCost = new Dictionary<int, int>(_world.ConnectionCount){{startLocationId, 0}};
-            var cameFrom = new Dictionary<int, int>(_world.ConnectionCount);
+            _frontier.Clear();
+            _bestCost.Clear();
+            _cameFrom.Clear();
+            _checked.Clear();
+            _bestCost[startLocationId] = 0;
+            _frontier.Enqueue(new FrontierEntry(startLocationId, 0), 0);
 
-            while (frontier.Count > 0)
+            while (_frontier.Count > 0)
             {
-                var currentId = frontier.Dequeue();
-                expandedNodes++;
-                if (currentId == goalLocationId)
+                var next = _frontier.Dequeue();
+                var currentId = next.Id;
+                if (next.GCost > _bestCost[currentId] || skipNodes != null && skipNodes.Contains(currentId))
                 {
-                    var route = ReconstructRoute(cameFrom, startLocationId, goalLocationId);
-                    return RouteResult.Success(route, expandedNodes, bestCost[goalLocationId]);
-                }
-
-                foreach (var connection in _world.GetOutgoingConnections(currentId))
-                {
-                    var gCost = bestCost[currentId] + connection.TravelCost;
-                    if (bestCost.TryAdd(connection.ToLocationId, gCost) || gCost < bestCost[connection.ToLocationId])
-                    {
-                        bestCost[connection.ToLocationId] = gCost;
-                        cameFrom[connection.ToLocationId] = connection.FromLocationId;
-                        var fCost = gCost + _world.DistanceBetween(connection.ToLocationId, goalLocationId);
-                        if (frontier.ContainsKey(connection.ToLocationId))
-                        {
-                            frontier[connection.ToLocationId] = fCost;
-                        }
-                        else
-                        {
-                            frontier.Enqueue(connection.ToLocationId, fCost);
-                        }
-                    }
+                    continue;
                 }
                 
+                expandedNodes++;
+                
+                if (currentId == goalLocationId)
+                {
+                    var route = ReconstructRoute(_cameFrom, startLocationId, goalLocationId);
+                    return RouteResult.Success(route, expandedNodes, _bestCost[goalLocationId]);
+                }
+                
+                var g = _bestCost[currentId];
+                foreach (var connection in _world.GetOutgoingConnections(currentId))
+                {
+                    var to = connection.ToLocationId;
+                    var gCost = g + connection.TravelCost;
+                    if (!_bestCost.TryGetValue(to, out var known) || gCost < known)
+                    {
+                        _bestCost[to] = gCost;
+                        _cameFrom[to] = currentId;
+                        var fCost = g + _world.DistanceBetween(to, goalLocationId);
+                        _frontier.Enqueue(new FrontierEntry(to, gCost), (int)fCost);
+                    }
+                }
             }
 
             return RouteResult.NotFound(expandedNodes);

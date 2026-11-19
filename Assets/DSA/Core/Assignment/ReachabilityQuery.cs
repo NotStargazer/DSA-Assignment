@@ -20,6 +20,8 @@ namespace FrontierDispatch.Core
     public sealed class ReachabilityQuery
     {
         private readonly WorldData _world;
+        private readonly MinPriorityQueue<int> _frontier;
+        private readonly Dictionary<int, int> _cameFrom;
 
         /// <summary>
         /// Creates a reachability query operating on the supplied world.
@@ -27,6 +29,8 @@ namespace FrontierDispatch.Core
         public ReachabilityQuery(WorldData world)
         {
             _world = world ?? throw new ArgumentNullException(nameof(world));
+            _frontier = new MinPriorityQueue<int>();
+            _cameFrom = new Dictionary<int, int>();
         }
 
         /// <summary>
@@ -38,8 +42,42 @@ namespace FrontierDispatch.Core
         /// </summary>
         public IReadOnlyDictionary<int, int> FindReachable(int startLocationId, int maxTravelCost)
         {
-            // TODO: adapt shortest-path reasoning to the travel-cost budget.
-            throw new NotImplementedException();
+            if (!_world.HasLocation(startLocationId))
+            {
+                return new Dictionary<int, int>();
+            }
+
+            if (maxTravelCost == 0)
+            {
+                return new Dictionary<int, int> { { startLocationId, 0 } };
+            }
+            
+            _frontier.Clear();
+            _cameFrom.Clear();
+            var reachable = new Dictionary<int, int> { { startLocationId, 0 } };
+            _frontier.Enqueue(startLocationId, 0);
+
+            while (_frontier.Count > 0)
+            {
+                var currentId = _frontier.Dequeue();
+
+                foreach (var connection in _world.GetOutgoingConnections(currentId))
+                {
+                    var cost = reachable[currentId] + connection.TravelCost;
+                    if (cost > maxTravelCost)
+                    {
+                        continue;
+                    }
+                    if (reachable.TryAdd(connection.ToLocationId, cost) || cost < reachable[connection.ToLocationId])
+                    {
+                        reachable[connection.ToLocationId] = cost;
+                        _cameFrom[connection.ToLocationId] = connection.FromLocationId;
+                        _frontier.Enqueue(connection.ToLocationId, cost);
+                    }
+                }
+            }
+
+            return reachable;
         }
     }
 }
