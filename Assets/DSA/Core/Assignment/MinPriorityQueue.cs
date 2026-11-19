@@ -121,30 +121,26 @@ namespace FrontierDispatch.Core
             }
         }
 
-        private void SiftUp(int i)
+        private void SiftUp(int index)
         {
-            var priority = _heap[i].Priority;
-            var li = LeftIndex(i);
-            var ri = li + 1;
-            while (ri < Count)
+            var priority = _heap[index].Priority;
+
+            while (true)
             {
-                var swap = _heap[li].Priority < _heap[ri].Priority ? li : ri;
-                if (priority < _heap[swap].Priority)
+                var leftIndex = LeftIndex(index);
+                var rightIndex = leftIndex + 1;
+                var swapIndex = leftIndex;
+                if (rightIndex < Count)
+                {
+                    swapIndex = _heap[leftIndex].Priority < _heap[rightIndex].Priority ? leftIndex : rightIndex;
+                }
+                else if (leftIndex >= Count || priority < _heap[swapIndex].Priority)
                 {
                     return;
                 }
-                Swap(i, swap);
-                i = swap;
-                li = LeftIndex(i);
-                ri = li + 1;
-            }
-
-            if (li < Count)
-            {
-                if (_heap[li].Priority < priority)
-                {
-                    Swap(i, li);
-                }
+                
+                Swap(swapIndex, index);
+                index = swapIndex;
             }
         }
 

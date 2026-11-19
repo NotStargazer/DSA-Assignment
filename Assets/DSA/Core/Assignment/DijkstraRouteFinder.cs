@@ -67,10 +67,11 @@ namespace FrontierDispatch.Core
                     return RouteResult.Success(route, expandedNodes, _bestCost[goalLocationId]);
                 }
 
+                var g = _bestCost[currentId];
                 foreach (var connection in _world.GetOutgoingConnections(currentId))
                 {
-                    var cost = _bestCost[currentId] + connection.TravelCost;
-                    if (!_bestCost.ContainsKey(connection.ToLocationId) || cost < _bestCost[connection.ToLocationId])
+                    var cost = g + connection.TravelCost;
+                    if (!_bestCost.TryGetValue(connection.ToLocationId, out var known) || cost < known)
                     {
                         _bestCost[connection.ToLocationId] = cost;
                         _cameFrom[connection.ToLocationId] = connection.FromLocationId;

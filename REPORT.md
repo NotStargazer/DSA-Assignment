@@ -61,12 +61,11 @@ Explain your route finder at a useful high level and how the travel-budget query
 
 | Operation | Your representation/algorithm | Complexity | Short explanation |
 | --- |-------------------------------| --- | --- |
-| Find location by ID | HashTable Lookup | O(1) | Using the ID as a hashed key we can very quickly find the correct node |
-| Get outgoing connections | HashTable Lookup | O(1) | For the same reason as Finding Location, we can return an array of outgoing connections |
-| Priority queue enqueue | Insert at top, sift toward the root node| O(log n) | Searches up the tree to find position in heap branch |
-| Priority queue dequeue-min | Swap last and root, sift towards leaf nodes | O(log n) | Swaps the top to maintain invarience, Searches down the tree to find position of swapped entry |
-| Priority queue set priority | HashTable Lookup to find index, sift accordingly| O(log n) | Uses a seperate dictionary to find the index of a node. Changes it's priority, then sifts up if value is lower, and down if value is bigger. |
-| Route finding| A* (A-star)                              | O(\|V\|)log(\|E\|)| Gets outgoing connections from a node and calculates their cost. Then repeats by choosing the lowest cost path until the goal node is reached. A-star introduces a heuristic cost to reduce the amount of required searches.|
+| Find location by ID | Key Value Table Lookup | O(1) on average, collisions may result in O(n) in worst case| Using the ID as a hashed key we can very quickly find the correct node |
+| Get outgoing connections | Key Value Table Lookup | O(1) on average, collisions may result in O(n) in worst case | For the same reason as Finding Location, we can return an array of outgoing connections |
+| Priority queue enqueue | Insert at top, sift toward the root node| O(log n) using binary heap| Searches up the tree to find position in heap branch |
+| Priority queue dequeue-min | Swap last and root, sift towards leaf nodes | O(log n) using binary heap | Swaps the top to maintain invarience, Searches down the tree to find position of swapped entry |
+| Route finding| A* (A-star)                              | O(\|V\|)log(\|E\|) with an adjacency graph. Each expanded edge is on average O(log(f)) where f is the number of nodes in the frontier.| Gets outgoing connections from a node and calculates their cost. Then repeats by choosing the lowest cost path until the goal node is reached. A-star introduces a heuristic that allows for a closer aproximation on which node is closer to the goal, thus reducing the amount of total work.|
 
 ## 5. Correctness and testing
 

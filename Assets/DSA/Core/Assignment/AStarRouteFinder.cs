@@ -39,7 +39,6 @@ namespace FrontierDispatch.Core
         private readonly MinPriorityQueue<FrontierEntry> _frontier;
         private readonly Dictionary<int, int> _bestCost;
         private readonly Dictionary<int, int> _cameFrom;
-        private readonly HashSet<int> _checked;
         
         public AStarRouteFinder(WorldData world)
         {
@@ -47,7 +46,6 @@ namespace FrontierDispatch.Core
             _frontier = new MinPriorityQueue<FrontierEntry>();
             _bestCost = new Dictionary<int, int>(_world.ConnectionCount);
             _cameFrom = new Dictionary<int, int>(_world.ConnectionCount);
-            _checked = new HashSet<int>();
         }
         
         public RouteResult FindRoute(int startLocationId, int goalLocationId, HashSet<int>? skipNodes = null)
@@ -63,10 +61,10 @@ namespace FrontierDispatch.Core
             }
 
             var expandedNodes = 0;
+            var relaxedNodes = 0;
             _frontier.Clear();
             _bestCost.Clear();
             _cameFrom.Clear();
-            _checked.Clear();
             _bestCost[startLocationId] = 0;
             _frontier.Enqueue(new FrontierEntry(startLocationId, 0), 0);
 
@@ -76,6 +74,7 @@ namespace FrontierDispatch.Core
                 var currentId = next.Id;
                 if (next.GCost > _bestCost[currentId] || skipNodes != null && skipNodes.Contains(currentId))
                 {
+                    relaxedNodes++;
                     continue;
                 }
                 
@@ -84,7 +83,7 @@ namespace FrontierDispatch.Core
                 if (currentId == goalLocationId)
                 {
                     var route = ReconstructRoute(_cameFrom, startLocationId, goalLocationId);
-                    return RouteResult.Success(route, expandedNodes, _bestCost[goalLocationId]);
+                    return RouteResult.SuccessAStar(route, expandedNodes, relaxedNodes, _bestCost[goalLocationId]);
                 }
                 
                 var g = _bestCost[currentId];
@@ -92,12 +91,13 @@ namespace FrontierDispatch.Core
                 {
                     var to = connection.ToLocationId;
                     var gCost = g + connection.TravelCost;
-                    if (!_bestCost.TryGetValue(to, out var known) || gCost < known)
+                    var hasVal = _bestCost.TryGetValue(to, out var known);
+                    if (!hasVal || gCost < known)
                     {
-                        _bestCost[to] = gCost;
-                        _cameFrom[to] = currentId;
-                        var fCost = g + _world.DistanceBetween(to, goalLocationId);
-                        _frontier.Enqueue(new FrontierEntry(to, gCost), (int)fCost);
+                        _bestCost[connection.ToLocationId] = gCost;
+                        _cameFrom[connection.ToLocationId] = currentId;
+                        var fCost = g + _world.DistanceBetween(connection.ToLocationId, goalLocationId);
+                        _frontier.Enqueue(new FrontierEntry(to, gCost), fCost);
                     }
                 }
             }

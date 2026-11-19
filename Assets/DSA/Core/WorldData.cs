@@ -32,12 +32,12 @@ namespace FrontierDispatch.Core
         public bool HasLocation(int locationId) => _locations.ContainsKey(locationId);
         public int ConnectionCount { get; }
 
-        public float DistanceBetween(int locationIdA, int locationIdB)
+        public int DistanceBetween(int locationIdA, int locationIdB)
         {
             var a = Locations[locationIdA].Position;
             var b = Locations[locationIdB].Position;
 
-            return Math.Abs(a.X - b.X) + MathF.Abs(a.Y - b.Y);
+            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
         }
     }
 }
