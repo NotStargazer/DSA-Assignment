@@ -16,7 +16,7 @@ namespace FrontierDispatch.Core
     public sealed class DijkstraRouteFinder
     {
         private readonly WorldData _world;
-        private readonly HashedPriorityMinQueue<int> _frontier;
+        private readonly MinPriorityQueue<int> _frontier;
         private readonly Dictionary<int, int> _bestCost;
         private readonly Dictionary<int, int> _cameFrom;
 
@@ -26,7 +26,7 @@ namespace FrontierDispatch.Core
         public DijkstraRouteFinder(WorldData world)
         {
             _world = world ?? throw new ArgumentNullException(nameof(world));
-            _frontier = new HashedPriorityMinQueue<int>();
+            _frontier = new MinPriorityQueue<int>();
             _bestCost = new Dictionary<int, int>(_world.ConnectionCount);
             _cameFrom = new Dictionary<int, int>(_world.ConnectionCount);
         }

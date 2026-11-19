@@ -36,7 +36,26 @@ Describe important changes/retained choices, operations affected, and time/memor
 
 Explain your route finder at a useful high level and how the travel-budget query adapts the same ideas.
 
-
+> ### Route Finder | A*
+> The route finder uses A* to traverse between each node and calculate their lowest cost. We do this with the following steps.
+> - Assign a map for the nodes' G-Cost and set the starting node's cost to 0. 
+> - Assign a Min Priority Queue and Enqueue the starting node with a priority of 0.
+> - Assign a map that links the lowest cost route back to their parents.
+> - Begin a loop that breaks there are no nodes left to check:
+>   - Take the lowest F-Cost node from the priority queue. 
+>   - Check if the current node is our goal node.
+>     - If it is our goal node, reconstruct the route and return a success.
+>   - Search each neighboring node of the current node and calculate their corresponding G-Costs.
+>   - If the G-Cost of the neighboring node is unassigned or less then the current cost. Replace the G-Cost and assign the parent node to the route map.
+>   - Calculate the F-Cost of the neighboring node using the G-Cost + the distance to the goal node.
+>   - Use the F-Cost as a priority and add the node to the Priority Queue
+>   - If it already exists in the queue then reassign the priority of that node.
+> - If the goal node is never found, return a failure.
+> 
+> **Reconstructing the Route**<br>
+> - Create a new list and add the goal node to it.
+> - Loop through the route map and trace the nodes back to the start node from the goal node. Add the nodes to the list as it does.
+> - 
 
 ## 4. Complexity
 
@@ -56,7 +75,7 @@ Important tests/edge cases and what they demonstrate.
 > ### Priority Queue
 > I felt it important that the priority queue maintains it's order regardless of how many random elements I insert. 
 > I added a test to ensure that the priority remains intact as they exit the queue.
-> 
+> ### 
 
 ## 6. Performance investigation
 
