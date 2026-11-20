@@ -72,16 +72,23 @@ Explain your route finder at a useful high level and how the travel-budget query
 | Get outgoing connections | Key Value Table Lookup | O(1) on average, collisions may result in O(n) in worst case | For the same reason as Finding Location, we can return an array of outgoing connections |
 | Priority queue enqueue | Insert at top, sift toward the root node| O(log n) using binary heap| Searches up the tree to find position in heap branch |
 | Priority queue dequeue-min | Swap last and root, sift towards leaf nodes | O(log n) using binary heap | Swaps the top to maintain invarience, Searches down the tree to find position of swapped entry |
-| Route finding| A* (A-star)                              | O(\|V\|)log(\|E\|) with an adjacency graph. Each expanded edge is on average O(log(f)) where f is the number of nodes in the frontier.| Gets outgoing connections from a node and calculates their cost. Then repeats by choosing the lowest cost path until the goal node is reached. A-star introduces a heuristic that allows for a closer aproximation on which node is closer to the goal, thus reducing the amount of total work.|
+| Route finding| A* (A-star)                              | O(\|V\|)log(\|E\|) with an adjacency graph. Each expanded edge is on average O(log(n)).| Gets outgoing connections from a node and calculates their cost. Then repeats by choosing the lowest cost path until the goal node is reached. A-star introduces a heuristic that allows for a closer aproximation on which node is closer to the goal, thus reducing the amount of total work.|
 
 ## 5. Correctness and testing
 
 Important tests/edge cases and what they demonstrate.
 
 > ### Priority Queue
-> I felt it important that the priority queue maintains it's order regardless of how many random elements I insert. 
-> I added a test to ensure that the priority remains intact as they exit the queue.
-> ### 
+> - `PriorityQueue_EnqueueAndDequeue_ReturnsCorrectOrder()` Ensures that as I add elements to the queue, the queue would not break invariance, regardless of the order I insert them in.
+> - `PriorityQueue_EnqueueAndDequeue_HandlesSingleElement()` Ensures the queue does not break if there's only one element remaining in the queue.
+> - `PriorityQueue_EnqueueAndDequeue_ThrowsWhenEmpty()` Ensures that the queue cannot be Peeked or Dequeued if the queue is empty.
+> ### A* Route Finder
+> - I first implemented some basic tests to ensure it would find the specified route I supplied it. `AStar_FindsGoal_CorrectPathAndCost()` makes sure that the path and cost in the supplied data-set match expectations.
+> - Edge cases for if the route is the same was important to test as well, so `AStar_StartEqualsGoal_ReturnsZeroCostRoute()` eliminates that uncertainty.
+> - I had to ensure that A* would match the cost of Dijkstra. But in order to do that I had to make sure that A* would be able to find the route as if it was Dijkstra first. The `AStar_FindsGoal_BadHeuristicReturnsSameAsDijkstra()` ensures that if A* runs on its own without heuristic it would still function as Dijkstra.
+> - I needed to ensure that A* was always taking expanding fewer nodes than Dijkstra to ensure the heuristic was being enforced. `AStar_DijkstraComparison_MatchingPathWithLessExpandedNodes()` Ensures that by checking if the resulting Dijkstra path has more expanded nodes then A*.
+> - Lastly I needed to check if A* was actually avoiding blocked nodes. So `AStar_BlocksNodes_DoesNotTraverseBlockedNodes()` would test to see if a specific node was not in the resulting route.
+> 
 
 ## 6. Performance investigation
 
@@ -106,29 +113,78 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 > ```
 > ### Path Finding Differences
 > 
-> Dijkstra performance metrics<br>
-> **Iterations Per World: 100 \| Checksum: 2210999**
-> | World Size | Small World | Medium World | Large World |
-> |---------------|--------------|-------------|------------|
-> | Locations   | 25 | 2500 | 40000 |
-> | Connections| 80 | 9800 | 159200 |
-> | Avg. Expanded| 11 | 1265 | 20079 |
-> | Total Cost| 1379 | 14958 | 58957 |
-> | Elapsed Time| 2 ms | 34 ms | 855 ms |
-> 
-> A-Star performance metrics<br>
-> **Iterations Per World: 100 \| Checksum: 1711324**
-> | World Size | Small World | Medium World | Large World |
-> |---------------|--------------|-------------|------------|
->| Locations| 25          | 2500         | 40000       |
->| Connections| 80          | 9800         | 159200      |
->| Avg. Expanded| 9           | 983          | 15366       |
->| Avg. Relaxed| 0           | 49           | 1617        |
->| Avg. Checked| 9           | 1032         | 16983       |
->| Total Cost| 1379        | 14964        | 58963       |
->| Elapsed Time| 2        ms | 44        ms | 638      ms |
-> 
 > I've been sitting and racking my brain over why the performance metrics for A* and Dijkstra seem to not want to vary. The amount of expanded nodes seems to evaluate to A* being correct, ergo on average O(|V|log|E|) but the difference in performance seems to be on average only a tiny bit slower. Despite the total checked nodes being significantly lower.
+> 
+> Upon further reflection I've concluded that it might be because of Csharp's Garbage collector. I decided to try turning it off for the tests and got much more favourable results.
+> 
+> Dijkstra performance metrics<br>
+> **Iterations Per World: 100 \| Checksum: 2220012**
+> | World Size | Small World | Medium World | Large World |
+> |---------------|--------------|-------------|------------|
+>| Locations      | 25          | 2500         | 40000       |
+>| Connections    | 80          | 9800         | 159200      |
+>| Avg. Expanded  | 11          | 1261         | 20173       |
+>| Total Cost     | 1379        | 14958        | 58957       |
+>| Elapsed Time   | 2        ms | 34        ms | 784      ms |
+>
+> A-Star performance metrics<br>
+> **Iterations Per World: 100 \| Checksum: 1811799**
+> | World Size | Small World | Medium World | Large World |
+> |---------------|--------------|-------------|------------|
+> | Locations      | 25          | 2500         | 40000       |
+> | Connections    | 80          | 9800         | 159200      |
+> | Avg. Expanded  | 9           | 981          | 15335       |
+> | Avg. Relaxed   | 0           | 11           | 1026        |
+> | Avg. Checked   | 9           | 992          | 16361       |
+> | Total Cost     | 1379        | 14958        | 58957       |
+> | Elapsed Time   | 2        ms | 31        ms | 647      ms |
+> 
+> Even though the difference between Dijkstra and A-Star is only ~17% compared to the estimated up to ~44% it saves on average. Due to the chaotic nature of the built worlds the amount of time A-Star can save isn't actually as much as a more contextual example. 
+> 
+> After running the test with less chaotic data I can safely determine that my pathfinding algorithm was not the cause for the slow-down. But rather that the data was pathological. The reason for this is probably that the heuristic was not taking enough president when determining the path to the goal due to graph being set on a world grid. This caused only minor increases in cost when traversing away from the goal and resulted in the gCost being more prevalent. 
+> 
+> Here are the results when using a more spread out node graph. Using a Euclidean Distance Heuristic.
+> 
+>Dijkstra performance metrics<br>
+> **Iterations Per World: 5000 | Checksum: 4495000**
+> |                | Small World | Medium World | Large World |
+> |---------------|--------------|-------------|------------|
+> | Locations      | 8           | 20           | 2500        |
+> | Connections    | 18          | 66           | 19404       |
+> | Avg. Expanded  | 6           | 22           | 3712        |
+> | Total Cost     | 70000       | 275000       | 3430000     |
+> | Elapsed Time   | 6 ms | 33 ms | 5298 ms |
+>
+> A-Star performance metrics<br>
+> **Iterations Per World: 5000 | Checksum: 893000**
+>| World Size | Small World | Medium World | Large World |
+>|---------------|--------------|-------------|------------|
+>|               | Small World | Medium World | Large World |
+>|Locations      | 8           | 20           | 2500        |
+>|Connections    | 18          | 66           | 19404       |
+>|Avg. Expanded  | 5           | 13           | 554         |
+>|Avg. Relaxed   | 0           | 2            | 247         |
+>|Avg. Checked   | 5           | 15           | 801         |
+>|Total Cost     | 70000       | 275000       | 3430000     |
+>|Elapsed Time   | 6 ms | 18 ms | 1457 ms |
+> 
+> A* has a very clear ~72% improvement in performance in large worlds in this case compared to Dijkstra. This dataset did require Euclidean distance.
+> 
+> ### World Creation
+> 
+> The initial metrics for world creation look like this.
+> 
+> **Large World Creation Metrics**
+> ```json
+> Locations: 40000
+> Connections: 159200
+> Memory Allocation (Bytes): 20,372,624 bytes
+> Memory Allocation (Mb): 20 Mb
+> Creation Time: 32.9709 ms
+> ```
+> 
+> The main thing that stood out to me is that connections do not need a `FromLocationId`. This is because the `FromLocationId` is already on the node when performing pathfinding algorithms. So instead of creating all the connections separately and adding them to the world data post creation would be more efficient.
+
 ## 7. Development reflection
 
 Describe one bug, wrong assumption, failed approach, or surprising result and how you investigated it.
@@ -138,12 +194,29 @@ Describe one bug, wrong assumption, failed approach, or surprising result and ho
 > I realized I would have to break encapsulation of the node and world data and allowed others to add connections to
 > what was supposed to be a complete set of data. I backtracked a bit and decided to place the data as separate lists
 > a dictionary instead.
+> ### A* Pathfinding
+> When attempting to implement A* pathfinding I first attempted to create a MinHeap combined with Dictionary, or a HashHeap if you will. In Theory, the benefit of this would be able to skip relaxing nodes if the gCost exceeded the existing node's gCost. I could simply update the priority of the existing frontier nodes. However, through performance testing this didn't pan out. The extra Dictionary lookups and having to resift the MinHeap node ended up only costing the algorithm more. I could potentially see this working with a better implementation of a PriorityQueue.
 
 ## 8. Tools and AI assistance
 
 Briefly describe relevant assistance, if any.
-> I don't believe in AI as a learning tool. The most I used it was to describe unfamiliar terms to me that I couldn't find a concise explanation on in either Wikipedia or other websites.
+> I mostly used it was to describe unfamiliar terms to me that I couldn't find a concise explanation on in either Wikipedia or other websites.<br>
+> Other cases were for helping describe common edge cases for A* or Dijkstra for testing implementation.
 
 ## 9. VG extension
 
 Only if attempting VG: heuristic, traversal constraints, correctness, and Dijkstra/A* comparison.
+
+> ### A-Star Implementation
+> 
+> **Heuristic**<br>
+> The heuristic I used depended on the graph supplied. Using manhatten distance made sense as the performance of this calculation was fast. But often only worked on a grid in which you could only traverse in cardinal directions. When attempting the same heuristic on a more open-ended world, the heuristic would fail to retrieve the optimal path. In that case Euclidean distance would have to be used. However, if the world data supplied had a lot of branching paths with more random costs, the Euclidean distance heuristic may end up becoming slower than the brute forcing of Dijkstra.
+> 
+> **Traversal Constraints**<br>
+> Traversal constrains was easy to implement. Whenever we encounter the node when checking the neighboring nodes, we simply skip the node instead and do not add it to the frontier.
+> 
+> **Correctness**<br>
+> To test correctness of A-Star, the bulk of testing was to ensure the resulting route that it retrieved had a matching cost to that of Dijkstra. While the  route could vary to that of Dijkstra's in some circumstances due to A-Star prioritizing the heuristic, the overall cost remained the same in all tested cases. Ensuring it took a different route when a specific node was blocked was also important to test.
+> 
+> **Comparison to A-Star**<br>
+> In almost all cases A* performed better in 1 metric. The amount of expanded nodes was a lot lower. However, because of the cost of traversing the neighboring nodes is higher due to the heuristic. There is a chance that in a pathological data-set, A* can perform worse than Dijkstra. In cases like this the heuristic would either be pointless in the worst case or need reevaluation in others.

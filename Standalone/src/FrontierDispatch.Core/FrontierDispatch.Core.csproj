@@ -15,5 +15,8 @@
     <Compile Update="..\..\..\Assets\DSA\Core\Assignment\MinPriorityQueue.cs">
       <Link>Core\Assignment\MinPriorityQueue.cs</Link>
     </Compile>
+    <Compile Update="..\..\..\Assets\DSA\Core\Assignment\Heuristics.cs">
+      <Link>Core\Assignment\Heuristic.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

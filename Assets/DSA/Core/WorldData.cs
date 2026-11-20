@@ -8,7 +8,7 @@ namespace FrontierDispatch.Core
         private readonly Dictionary<int, Location> _locations;
         private readonly Dictionary<int, List<Connection>> _connections;
 
-        public WorldData(ICollection<Location> locations, ICollection<Connection> connections)
+        public WorldData(ICollection<Location> locations)
         {
             if (locations == null) throw new ArgumentNullException(nameof(locations));
             _locations = new Dictionary<int, Location>(locations.Count);
@@ -19,24 +19,23 @@ namespace FrontierDispatch.Core
                 _locations.Add(location.Id, location);
                 _connections.Add(location.Id, new List<Connection>());
             }
-
-            ConnectionCount = connections.Count;
-            foreach (var connection in connections)
-            {
-                _connections[connection.FromLocationId].Add(connection);
-            }
         }
 
         public IReadOnlyDictionary<int, Location> Locations => _locations;
         public IReadOnlyList<Connection> GetOutgoingConnections(int fromLocationId) => _connections[fromLocationId];
         public bool HasLocation(int locationId) => _locations.ContainsKey(locationId);
-        public int ConnectionCount { get; }
-
-        public int DistanceBetween(WorldPosition a, WorldPosition b)
-        {
-            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
-        }
+        public int ConnectionCount { get; private set; }
 
         public WorldPosition GetWorldPos(int locationId) => _locations[locationId].Position;
+
+        public void AddConnection(int fromId, int toId, int travelCost)
+        {
+            ConnectionCount++;
+            var didAdd = _connections.TryAdd(fromId, new List<Connection> { new (toId, travelCost) });
+            if (!didAdd)
+            {
+                _connections[fromId].Add(new Connection(toId, travelCost));
+            }
+        }
     }
 }

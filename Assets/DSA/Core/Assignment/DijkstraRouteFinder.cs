@@ -61,6 +61,7 @@ namespace FrontierDispatch.Core
             {
                 var currentId = _frontier.Dequeue();
                 expandedNodes++;
+                
                 if (currentId == goalLocationId)
                 {
                     var route = ReconstructRoute(_cameFrom, startLocationId, goalLocationId);
@@ -74,7 +75,7 @@ namespace FrontierDispatch.Core
                     if (!_bestCost.TryGetValue(connection.ToLocationId, out var known) || cost < known)
                     {
                         _bestCost[connection.ToLocationId] = cost;
-                        _cameFrom[connection.ToLocationId] = connection.FromLocationId;
+                        _cameFrom[connection.ToLocationId] = currentId;
                         _frontier.Enqueue(connection.ToLocationId, cost);
                     }
                 }

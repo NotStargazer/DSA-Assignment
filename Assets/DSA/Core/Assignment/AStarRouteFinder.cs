@@ -35,13 +35,17 @@ namespace FrontierDispatch.Core
 
     public sealed class AStarRouteFinder
     {
+        public delegate int Heuristic(WorldPosition a, WorldPosition b);
+        
         private readonly WorldData _world;
         private readonly MinPriorityQueue<FrontierEntry> _frontier;
         private readonly Dictionary<int, int> _bestCost;
         private readonly Dictionary<int, int> _cameFrom;
+        private readonly Heuristic _heuristic;
         
-        public AStarRouteFinder(WorldData world)
+        public AStarRouteFinder(WorldData world, Heuristic heuristicFunction)
         {
+            _heuristic = heuristicFunction ?? throw new ArgumentNullException(nameof(heuristicFunction));
             _world = world ?? throw new ArgumentNullException(nameof(world));
             _frontier = new MinPriorityQueue<FrontierEntry>(_world.ConnectionCount);
             _bestCost = new Dictionary<int, int>(_world.ConnectionCount);
@@ -100,9 +104,9 @@ namespace FrontierDispatch.Core
                             continue;
                         }
                         
-                        _bestCost[connection.ToLocationId] = gCost;
-                        _cameFrom[connection.ToLocationId] = currentId;
-                        var fCost = gCost + _world.DistanceBetween(_world.GetWorldPos(connection.ToLocationId), goalWorldPos);
+                        _bestCost[to] = gCost;
+                        _cameFrom[to] = currentId;
+                        var fCost = gCost + _heuristic(_world.GetWorldPos(to), goalWorldPos);
                         _frontier.Enqueue(new FrontierEntry(to, gCost), fCost);
                     }
                 }

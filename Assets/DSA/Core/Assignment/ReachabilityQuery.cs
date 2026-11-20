@@ -71,7 +71,7 @@ namespace FrontierDispatch.Core
                     if (reachable.TryAdd(connection.ToLocationId, cost) || cost < reachable[connection.ToLocationId])
                     {
                         reachable[connection.ToLocationId] = cost;
-                        _cameFrom[connection.ToLocationId] = connection.FromLocationId;
+                        _cameFrom[connection.ToLocationId] = currentId;
                         _frontier.Enqueue(connection.ToLocationId, cost);
                     }
                 }

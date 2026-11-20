@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using FrontierDispatch.Core;
 
@@ -67,7 +68,7 @@ namespace FrontierDispatch.Tests
         [Test]
         public void AStar_StartEqualsGoal_ReturnsZeroCostRoute()
         {
-            var finder = new AStarRouteFinder(WorldDatasetFactory.CreateSmall());
+            var finder = new AStarRouteFinder(WorldDatasetFactory.CreateSmall(), Heuristics.EuclideanDistance);
             RouteResult result = finder.FindRoute(0, 0);
             Assert.That(result.Found, Is.True);
             Assert.That(result.TotalCost, Is.EqualTo(0));
@@ -75,13 +76,54 @@ namespace FrontierDispatch.Tests
         }
 
         [Test]
-        public void AStar_FindsGoal()
+        public void AStar_FindsGoal_CorrectPathAndCost()
         {
-            var finder = new AStarRouteFinder(SampleWorldFactory.CreateSmall());
+            var finder = new AStarRouteFinder(SampleWorldFactory.CreateSmall(), Heuristics.EuclideanDistance);
             RouteResult result = finder.FindRoute(101, 734);
             Assert.That(result.Found, Is.True);
             Assert.That(result.TotalCost, Is.EqualTo(14));
             Assert.That(result.LocationIds, Is.EqualTo([101, 310, 512, 734]));
+        }
+        
+        [Test]
+        public void AStar_FindsGoal_BadHeuristicReturnsSameAsDijkstra()
+        {
+            var world = SampleWorldFactory.CreateSmall();
+            var dijkstra = new DijkstraRouteFinder(world);
+            var astar = new AStarRouteFinder(world, (_, _) => 0);
+            var dijkstraResult = dijkstra.FindRoute(101, 734);
+            var astarResult = astar.FindRoute(101, 734);
+            Assert.That(dijkstraResult.Found, Is.EqualTo(astarResult.Found));
+            Assert.That(dijkstraResult.ExpandedCount, Is.EqualTo(astarResult.ExpandedCount));
+            Assert.That(dijkstraResult.TotalCost, Is.EqualTo(astarResult.TotalCost));
+        }
+        
+        [Test]
+        public void AStar_DijkstraComparison_MatchingPathWithLessExpandedNodes()
+        {
+            var random = new Random(1337);
+            for (var i = 10; i <= 100; i++)
+            {
+                var world = WorldDatasetFactory.CreateGrid(i, i);
+                var dijkstra = new DijkstraRouteFinder(world);
+                var astar = new AStarRouteFinder(world, Heuristics.ManhattenDistance);
+                var s = random.Next(0, world.Locations.Count);
+                var g = random.Next(0, world.Locations.Count);
+                var dijkstraResult = dijkstra.FindRoute(s, g);
+                var astarResult = astar.FindRoute(s, g);
+                Assert.That(dijkstraResult.ExpandedCount, Is.GreaterThan(astarResult.ExpandedCount));
+                Assert.That(dijkstraResult.TotalCost, Is.EqualTo(astarResult.TotalCost));
+            }
+        }
+        
+        [Test]
+        public void AStar_BlocksNodes_DoesNotTraverseBlockedNodes()
+        {
+            var finder = new AStarRouteFinder(SampleWorldFactory.CreateSmall(), Heuristics.EuclideanDistance);
+            var result = finder.FindRoute(101, 734, [512]);
+            Assert.That(result.Found, Is.True);
+            Assert.That(result.TotalCost, Is.EqualTo(15));
+            Assert.That(result.LocationIds, Does.Not.Contain(512));
         }
 
         [Test]
