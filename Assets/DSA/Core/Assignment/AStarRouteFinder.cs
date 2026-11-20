@@ -67,6 +67,7 @@ namespace FrontierDispatch.Core
             _cameFrom.Clear();
             _bestCost[startLocationId] = 0;
             _frontier.Enqueue(new FrontierEntry(startLocationId, 0), 0);
+            var goalWorldPos = _world.GetWorldPos(goalLocationId);
 
             while (_frontier.Count > 0)
             {
@@ -101,7 +102,7 @@ namespace FrontierDispatch.Core
                         
                         _bestCost[connection.ToLocationId] = gCost;
                         _cameFrom[connection.ToLocationId] = currentId;
-                        var fCost = g + _world.DistanceBetween(connection.ToLocationId, goalLocationId);
+                        var fCost = gCost + _world.DistanceBetween(_world.GetWorldPos(connection.ToLocationId), goalWorldPos);
                         _frontier.Enqueue(new FrontierEntry(to, gCost), fCost);
                     }
                 }

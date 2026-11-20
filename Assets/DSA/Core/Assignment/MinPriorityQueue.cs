@@ -140,11 +140,17 @@ namespace FrontierDispatch.Core
                 var leftIndex = LeftIndex(index);
                 var rightIndex = leftIndex + 1;
                 var swapIndex = leftIndex;
+                
                 if (rightIndex < Count)
                 {
                     swapIndex = _heap[leftIndex].Priority < _heap[rightIndex].Priority ? leftIndex : rightIndex;
                 }
-                else if (leftIndex >= Count || priority < _heap[swapIndex].Priority)
+                else if (leftIndex >= Count)
+                {
+                    return;
+                }
+
+                if (priority < _heap[swapIndex].Priority)
                 {
                     return;
                 }
