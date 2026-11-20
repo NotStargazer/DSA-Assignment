@@ -43,25 +43,25 @@ static void RunBaseline()
 {
     // Build the dataset before timing the repeated runtime queries.
     // This baseline therefore measures query work, not world construction.
-    WorldData world = WorldDatasetFactory.CreateMedium();
+    var world = WorldDatasetFactory.CreateMedium();
     var queries = new WorldQueries(world);
 
     // The checksum provides a stable sanity check that the workload still
     // produces equivalent results after implementation changes.
-    int checksum = 0;
+    var checksum = 0;
 
     const int iterations = 5000;
 
     var sw = Stopwatch.StartNew();
 
-    for (int i = 0; i < iterations; ++i)
+    for (var i = 0; i < iterations; ++i)
     {
         // Deterministically visit many different location IDs rather than
         // repeatedly querying the same location.
-        int id = (i * 997) % world.Locations.Count;
+        var id = (i * 997) % world.Locations.Count;
 
-        Location? location = queries.FindLocationById(id);
-        checksum += location?.Id ?? 0;
+        var location = queries.FindLocationById(id);
+        checksum += location != null ? id : 0;
         checksum += queries.FindOutgoingConnections(id)?.Count ?? 0;
     }
 

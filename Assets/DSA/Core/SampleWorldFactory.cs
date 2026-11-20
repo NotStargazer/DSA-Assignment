@@ -1,76 +1,68 @@
 using System;
 using System.Collections.Generic;
 
+//Full credit to Alex for supplying this full sample world factory.
 namespace FrontierDispatch.Core
 {
     public static class SampleWorldFactory
     {
         public static WorldData CreateSmall()
         {
-            var locations = new[]
+            var locations = new Dictionary<int, Location>
             {
-                new Location(101, "Harbor", new WorldPosition(-4, -1), "Port"),
-                new Location(205, "Relay", new WorldPosition(-1, 2), "Relay"),
-                new Location(310, "Crossroads", new WorldPosition(1, 0), "Junction"),
-                new Location(512, "Old Mine", new WorldPosition(4, 2), "Industry"),
-                new Location(734, "North Gate", new WorldPosition(3, 5), "Gate"),
-                new Location(901, "Farm", new WorldPosition(-3, 5), "Farm"),
-                new Location(666, "Hell", new WorldPosition(-4, 1), "Gate"),
-                new Location(999, "Persephone's Garden", new WorldPosition(-4, 2), "Farm")
+                { 101, new Location("Harbor", new WorldPosition(-4, -1), "Port") },
+                { 205, new Location("Relay", new WorldPosition(-1, 2), "Relay") },
+                { 310, new Location("Crossroads", new WorldPosition(1, 0), "Junction") },
+                { 512, new Location("Old Mine", new WorldPosition(4, 2), "Industry") },
+                { 734, new Location("North Gate", new WorldPosition(3, 5), "Gate") },
+                { 901, new Location("Farm", new WorldPosition(-3, 5), "Farm") },
+                { 666, new Location("Hell", new WorldPosition(-4, 1), "Gate") },
+                { 999, new Location("Persephone's Garden", new WorldPosition(-4, 2), "Farm") },
             };
 
-            var connections = new[]
-            {
-                new Connection(101, 205, 4), new Connection(205, 101, 4),
-                new Connection(101, 310, 7), new Connection(310, 101, 7),
-                new Connection(205, 310, 3), new Connection(310, 205, 3),
-                new Connection(205, 901, 5), new Connection(901, 205, 5),
-                new Connection(310, 512, 4), new Connection(512, 310, 4),
-                new Connection(310, 734, 8), new Connection(734, 310, 8),
-                new Connection(512, 734, 3), new Connection(734, 512, 3),
-                new Connection(901, 734, 7), new Connection(734, 901, 7),
-                new Connection(666, 999, 0), new Connection(999, 666, 0)
-            };
-
-            return new WorldData(locations, connections);
+            var connections = Utilities.CreateConnectionDictionary(locations);
+            
+            connections.AddConnection(101, 205, 4); connections.AddConnection(205, 101, 4);
+            connections.AddConnection(101, 310, 7); connections.AddConnection(310, 101, 7);
+            connections.AddConnection(205, 310, 3); connections.AddConnection(310, 205, 3);
+            connections.AddConnection(205, 901, 5); connections.AddConnection(901, 205, 5);
+            connections.AddConnection(310, 512, 4); connections.AddConnection(512, 310, 4);
+            connections.AddConnection(310, 734, 8); connections.AddConnection(734, 310, 8);
+            connections.AddConnection(512, 734, 3); connections.AddConnection(734, 512, 3);
+            connections.AddConnection(901, 734, 7); connections.AddConnection(734, 901, 7);
+            connections.AddConnection(666, 999, 0); connections.AddConnection(999, 666, 0);
+            
+            var world = new WorldData(locations, connections);
+            return world;
         }
         
         public static WorldData CreateMedium()
         {
-            var locations = new[]
+            var locations = new Dictionary<int, Location>
             {
-                new Location(101, "Harbor", new WorldPosition(-18, -14), "Port"),
-                new Location(102, "Lighthouse", new WorldPosition(-20, -6), "Port"),
-                new Location(120, "Salt Flats", new WorldPosition(-20, -18), "Wilderness"),
-                new Location(130, "Ruins", new WorldPosition(-10, -20), "Wilderness"),
-                new Location(205, "Relay", new WorldPosition(-10, -8), "Relay"),
-                new Location(210, "Fishing Camp", new WorldPosition(-14, 2), "Camp"),
-                new Location(310, "Crossroads", new WorldPosition(-2, -4), "Junction"),
-                new Location(315, "Trading Post", new WorldPosition(-6, 6), "Market"),
-                new Location(320, "Sawmill", new WorldPosition(4, -12), "Industry"),
-                new Location(410, "Ferry Landing", new WorldPosition(8, -4), "Port"),
-                new Location(415, "Watchtower", new WorldPosition(0, 8), "Outpost"),
-                new Location(512, "Old Mine", new WorldPosition(14, 4), "Industry"),
-                new Location(520, "Quarry", new WorldPosition(18, -8), "Industry"),
-                new Location(601, "Ranger Station", new WorldPosition(-8, 14), "Outpost"),
-                new Location(610, "Chapel", new WorldPosition(6, 14), "Settlement"),
-                new Location(620, "Smelter", new WorldPosition(12, 10), "Industry"),
-                new Location(901, "Farm", new WorldPosition(-16, 12), "Farm"),
-                new Location(905, "Orchard", new WorldPosition(-12, 18), "Farm"),
-                new Location(910, "Pasture", new WorldPosition(2, 20), "Farm"),
-                new Location(734, "North Gate", new WorldPosition(16, 18), "Gate")
+                { 101, new Location("Harbor", new WorldPosition(-18, -14), "Port") },
+                { 102, new Location("Lighthouse", new WorldPosition(-20, -6), "Port") },
+                { 120, new Location("Salt Flats", new WorldPosition(-20, -18), "Wilderness") },
+                { 130, new Location("Ruins", new WorldPosition(-10, -20), "Wilderness") },
+                { 205, new Location("Relay", new WorldPosition(-10, -8), "Relay") },
+                { 210, new Location("Fishing Camp", new WorldPosition(-14, 2), "Camp") },
+                { 310, new Location("Crossroads", new WorldPosition(-2, -4), "Junction") },
+                { 315, new Location("Trading Post", new WorldPosition(-6, 6), "Market") },
+                { 320, new Location("Sawmill", new WorldPosition(4, -12), "Industry") },
+                { 410, new Location("Ferry Landing", new WorldPosition(8, -4), "Port") },
+                { 415, new Location("Watchtower", new WorldPosition(0, 8), "Outpost") },
+                { 512, new Location("Old Mine", new WorldPosition(14, 4), "Industry") },
+                { 520, new Location("Quarry", new WorldPosition(18, -8), "Industry") },
+                { 601, new Location("Ranger Station", new WorldPosition(-8, 14), "Outpost") },
+                { 610, new Location("Chapel", new WorldPosition(6, 14), "Settlement") },
+                { 620, new Location("Smelter", new WorldPosition(12, 10), "Industry") },
+                { 901, new Location("Farm", new WorldPosition(-16, 12), "Farm") },
+                { 905, new Location("Orchard", new WorldPosition(-12, 18), "Farm") },
+                { 910, new Location("Pasture", new WorldPosition(2, 20), "Farm") },
+                { 734, new Location("North Gate", new WorldPosition(16, 18), "Gate") },
             };
 
-            var locationsById = new Dictionary<int, Location>();
-            foreach (Location location in locations)
-            {
-                locationsById.Add(location.Id, location);
-            }
-
-            var connections = new List<Connection>();
-
-            void Road(int a, int b, int extraCost = 0) =>
-                AddRoad(connections, locationsById[a], locationsById[b], extraCost);
+            var connections = Utilities.CreateConnectionDictionary(locations);
 
             Road(101, 102);
             Road(101, 205);
@@ -106,7 +98,12 @@ namespace FrontierDispatch.Core
             Road(905, 910);
             Road(901, 905);
 
-            return new WorldData(locations, connections);
+            var world = new WorldData(locations, connections);
+            
+            return world;
+
+            void Road(int a, int b, int extraCost = 0) =>
+                AddRoad(connections, a, b, locations[a], locations[b], extraCost);
         }
 
         public static WorldData CreateLarge()
@@ -115,35 +112,43 @@ namespace FrontierDispatch.Core
             const int height = 50;
             const int spacing = 10;
 
-            var locations = new List<Location>(width * height);
-            var grid = new Location[width, height];
+            var locations = new Dictionary<int, Location>(width * height);
+            var connections = new Dictionary<int, List<Connection>>(width * height);
+            var grid = new int[width, height];
 
-            for (int y = 0; y < height; ++y)
+            for (var y = 0; y < height; ++y)
             {
-                for (int x = 0; x < width; ++x)
+                for (var x = 0; x < width; ++x)
                 {
                     // Fixed offset between -3 and +3 so the outposts don't sit on a perfect grid.
-                    int offsetX = (x * 73 + y * 151) % 7 - 3;
-                    int offsetY = (x * 37 + y * 89) % 7 - 3;
+                    var offsetX = (x * 73 + y * 151) % 7 - 3;
+                    var offsetY = (x * 37 + y * 89) % 7 - 3;
                     var position = new WorldPosition(x * spacing + offsetX, y * spacing + offsetY);
 
+                    var id = 0;
                     Location location;
-                    if (x == 2 && y == 2)
+                    switch (x)
                     {
-                        location = new Location(101, "Harbor", position, "Port");
-                    }
-                    else if (x == width - 3 && y == height - 3)
-                    {
-                        location = new Location(734, "North Gate", position, "Gate");
-                    }
-                    else
-                    {
-                        int id = 1000 + y * width + x;
-                        location = new Location(id, $"Outpost {id}", position, "Outpost");
+                        case 2 when y == 2:
+                            id = 101;
+                            location = new Location("Harbor", position, "Port");
+                            break;
+                        case width - 3 when y == height - 3:
+                            id = 734;
+                            location = new Location("North Gate", position, "Gate");
+                            break;
+                        default:
+                        {
+                            id = 1000 + y * width + x;
+                            location = new Location($"Outpost {id}", position, "Outpost");
+                            locations.Add(id, location);
+                            break;
+                        }
                     }
 
-                    locations.Add(location);
-                    grid[x, y] = location;
+                    locations.Add(id, location);
+                    connections.Add(id, new List<Connection>());
+                    grid[x, y] = id;
                 }
             }
 
@@ -152,13 +157,11 @@ namespace FrontierDispatch.Core
             int[] stepX = { 1, 0, 1, -1 };
             int[] stepY = { 0, 1, 1, 1 };
 
-            var connections = new List<Connection>();
-
-            for (int y = 0; y < height; ++y)
+            for (var y = 0; y < height; ++y)
             {
-                for (int x = 0; x < width; ++x)
+                for (var x = 0; x < width; ++x)
                 {
-                    for (int i = 0; i < stepX.Length; ++i)
+                    for (var i = 0; i < stepX.Length; ++i)
                     {
                         int neighbourX = x + stepX[i];
                         int neighbourY = y + stepY[i];
@@ -169,7 +172,9 @@ namespace FrontierDispatch.Core
                         }
 
                         int roughGround = (x * 31 + y * 17 + stepX[i] * 7 + stepY[i] * 13) % 3;
-                        AddRoad(connections, grid[x, y], grid[neighbourX, neighbourY], roughGround);
+                        var id = grid[x, y];
+                        var neighborId = grid[x, y];
+                        AddRoad(connections, id, neighborId, locations[id], locations[neighborId], roughGround);
                     }
                 }
             }
@@ -178,14 +183,14 @@ namespace FrontierDispatch.Core
         }
 
         // Adds a two-way road. The cost is the straight-line length rounded up, plus any extra cost.
-        private static void AddRoad(WorldData world, Location a, Location b, int extraCost)
+        private static void AddRoad(Dictionary<int, List<Connection>> world, int from, int to, Location a, Location b, int extraCost)
         {
             var dx = a.Position.X - b.Position.X;
             var dy = a.Position.Y - b.Position.Y;
             var cost = (int)Math.Ceiling(Math.Sqrt(dx * dx + dy * dy)) + extraCost;
 
-            world.AddConnection(a.Id, b.Id, cost);
-            world.AddConnection(b.Id, a.Id, cost);
+            world.AddConnection(from, to, cost);
+            world.AddConnection(to, from, cost);
         }
     }
 }

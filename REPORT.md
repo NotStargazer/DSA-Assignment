@@ -184,6 +184,30 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 > ```
 > 
 > The main thing that stood out to me is that connections do not need a `FromLocationId`. This is because the `FromLocationId` is already on the node when performing pathfinding algorithms. So instead of creating all the connections separately and adding them to the world data post creation would be more efficient.
+> 
+> **Large World Creation Metrics**
+> ```json
+>Locations: 40000
+>Connections: 159200
+>Memory Allocation (Bytes): 14,904,256 bytes
+>Memory Allocation (Mb): 15 Mb
+>Creation Time: 15,5484 ms
+> ```
+> 
+> Not only did this create significantly less data than before, it also improved performance by a very noticeable amount too. Due to us not having to go through the step of populating `WorldData` with connections anymore. This saves space without losing any information since if we need to retrieve the connections, we already know the `FromLocationId`. And if we need to iterate to find by any other information. We have the key already saved on the Dictionary KeyValue pair.
+> 
+> Knowing this we can also extend this logic to `Location`. We can remove the ID from location to save additional data, and we can instead store the Id as the Key in the KeyValue pair in the dictionary. Saving additional space.
+> 
+> **Large World Creation Metrics**
+> ```json
+>Locations: 40000
+>Connections: 159200
+>Memory Allocation (Bytes): 14,264,160 bytes
+>Memory Allocation (Mb): 14 Mb
+>Creation Time: 14,6792 ms
+> ```
+> 
+> With this I've managed to get the total down to roughly 14 mb while also giving a tiny bit more performance due to not having to populate the lists in the dictionary.
 
 ## 7. Development reflection
 

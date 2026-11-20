@@ -18,5 +18,7 @@
     <Compile Update="..\..\..\Assets\DSA\Core\Assignment\Heuristics.cs">
       <Link>Core\Assignment\Heuristic.cs</Link>
     </Compile>
+    <Compile Include="Core\ConnectionTable.cs" />
+    <Compile Include="Core\Utilities.cs" />
   </ItemGroup>
 </Project>

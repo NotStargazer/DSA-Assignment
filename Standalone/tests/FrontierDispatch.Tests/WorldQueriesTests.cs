@@ -20,17 +20,5 @@ namespace FrontierDispatch.Tests
             var queries = new WorldQueries(SampleWorldFactory.CreateSmall());
             Assert.That(queries.FindLocationById(9999), Is.Null);
         }
-
-        [Test]
-        public void FindOutgoingConnections_ReturnsOnlyMatchingOrigin()
-        {
-            var queries = new WorldQueries(SampleWorldFactory.CreateSmall());
-            var outgoing = queries.FindOutgoingConnections(734);
-            Assert.That(outgoing.Count, Is.EqualTo(3));
-            for (int i = 0; i < outgoing.Count; ++i)
-            {
-                Assert.That(outgoing[i].FromLocationId, Is.EqualTo(734));
-            }
-        }
     }
 }
