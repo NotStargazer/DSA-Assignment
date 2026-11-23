@@ -125,7 +125,7 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 >| Connections    | 80          | 9800         | 159200      |
 >| Avg. Expanded  | 11          | 1261         | 20173       |
 >| Total Cost     | 1379        | 14958        | 58957       |
->| Elapsed Time   | 2        ms | 34        ms | 784      ms |
+>| Elapsed Time   | 2        ms | 34        ms | 749      ms |
 >
 > A-Star performance metrics<br>
 > **Iterations Per World: 100 \| Checksum: 1811799**
@@ -139,7 +139,7 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 > | Total Cost     | 1379        | 14958        | 58957       |
 > | Elapsed Time   | 2        ms | 31        ms | 647      ms |
 > 
-> Even though the difference between Dijkstra and A-Star is only ~17% compared to the estimated up to ~44% it saves on average. Due to the chaotic nature of the built worlds the amount of time A-Star can save isn't actually as much as a more contextual example. 
+> Even though the difference between Dijkstra and A-Star is only ~14% compared to the estimated up to ~44% it saves on average. Due to the chaotic nature of the built worlds the amount of time A-Star can save isn't actually as much as a more contextual example. 
 > 
 > After running the test with less chaotic data I can safely determine that my pathfinding algorithm was not the cause for the slow-down. But rather that the data was pathological. The reason for this is probably that the heuristic was not taking enough president when determining the path to the goal due to graph being set on a world grid. This caused only minor increases in cost when traversing away from the goal and resulted in the gCost being more prevalent. 
 > 
@@ -153,7 +153,7 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 > | Connections    | 18          | 66           | 19404       |
 > | Avg. Expanded  | 6           | 22           | 3712        |
 > | Total Cost     | 70000       | 275000       | 3430000     |
-> | Elapsed Time   | 6 ms | 33 ms | 5298 ms |
+> | Elapsed Time   | 6 ms | 33 ms | 5030 ms |
 >
 > A-Star performance metrics<br>
 > **Iterations Per World: 5000 | Checksum: 893000**
@@ -168,7 +168,7 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 >|Total Cost     | 70000       | 275000       | 3430000     |
 >|Elapsed Time   | 6 ms | 18 ms | 1457 ms |
 > 
-> A* has a very clear ~72% improvement in performance in large worlds in this case compared to Dijkstra. This dataset did require Euclidean distance.
+> A* has a very clear ~71% improvement in performance in large worlds in this case compared to Dijkstra. This dataset did require Euclidean distance.
 > 
 > ### World Creation
 > 
@@ -196,7 +196,7 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 > 
 > Not only did this create significantly less data than before, it also improved performance by a very noticeable amount too. Due to us not having to go through the step of populating `WorldData` with connections anymore. This saves space without losing any information since if we need to retrieve the connections, we already know the `FromLocationId`. And if we need to iterate to find by any other information. We have the key already saved on the Dictionary KeyValue pair.
 > 
-> Knowing this we can also extend this logic to `Location`. We can remove the ID from location to save additional data, and we can instead store the Id as the Key in the KeyValue pair in the dictionary. Saving additional space.
+> Knowing this we can also extend this logic to `Location`. We can remove the ID from location to save additional data, and we can instead store the ID as the Key in the KeyValue pair in the dictionary. Saving additional space.
 > 
 > **Large World Creation Metrics**
 > ```json

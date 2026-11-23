@@ -11,7 +11,7 @@ namespace FrontierDispatch.Core
         public RouteResult(bool found, IReadOnlyList<int>? locationIds, int totalCost, int expandedCount, int relaxedNodes = 0)
         {
             Found = found;
-            LocationIds = locationIds ?? throw new ArgumentNullException(nameof(locationIds));
+            LocationIds = locationIds;
             TotalCost = totalCost;
             ExpandedCount = expandedCount;
             RelaxedNodes = relaxedNodes;
@@ -26,7 +26,7 @@ namespace FrontierDispatch.Core
         /// Location IDs making up the resulting route, in traversal order.
         /// For a successful route, this includes the start and goal.
         /// </summary>
-        public IReadOnlyList<int> LocationIds { get; }
+        public IReadOnlyList<int>? LocationIds { get; }
 
         /// <summary>
         /// Sum of the connection travel costs along the resulting route.

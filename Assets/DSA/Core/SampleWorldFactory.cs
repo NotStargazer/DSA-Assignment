@@ -139,9 +139,8 @@ namespace FrontierDispatch.Core
                             break;
                         default:
                         {
-                            id = 1000 + y * width + x;
+                            id = 1000 + y * height + x;
                             location = new Location($"Outpost {id}", position, "Outpost");
-                            locations.Add(id, location);
                             break;
                         }
                     }
@@ -173,7 +172,7 @@ namespace FrontierDispatch.Core
 
                         int roughGround = (x * 31 + y * 17 + stepX[i] * 7 + stepY[i] * 13) % 3;
                         var id = grid[x, y];
-                        var neighborId = grid[x, y];
+                        var neighborId = grid[neighbourX, neighbourY];
                         AddRoad(connections, id, neighborId, locations[id], locations[neighborId], roughGround);
                     }
                 }
