@@ -68,6 +68,16 @@ namespace FrontierDispatch.Core
 
             return _heap[0].Item;
         }
+        
+        public int PeekPriority()
+        {
+            if (Count == 0)
+            {
+                throw new InvalidOperationException("Queue is empty");
+            }
+
+            return _heap[0].Priority;
+        }
 
         /// <summary>
         /// Removes and returns the minimum-priority item.

@@ -59,8 +59,14 @@ namespace FrontierDispatch.Core
 
             while (_frontier.Count > 0)
             {
+                var priority = _frontier.PeekPriority();
                 var currentId = _frontier.Dequeue();
                 expandedNodes++;
+
+                if (priority > _bestCost[currentId])
+                {
+                    continue;
+                }
                 
                 if (currentId == goalLocationId)
                 {
