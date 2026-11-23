@@ -146,7 +146,7 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 > Here are the results when using a more spread out node graph. Using a Euclidean Distance Heuristic.
 > 
 >Dijkstra performance metrics<br>
-> **Iterations Per World: 5000 | Checksum: 4495000**
+> **Iterations Per World: 5000 | Checksum: 22475000**
 > |                | Small World | Medium World | Large World |
 > |---------------|--------------|-------------|------------|
 > | Locations      | 8           | 20           | 2500        |
@@ -156,7 +156,7 @@ Record reproducible before/after measurements for loading/preparation, repeated 
 > | Elapsed Time   | 6 ms | 33 ms | 5030 ms |
 >
 > A-Star performance metrics<br>
-> **Iterations Per World: 5000 | Checksum: 893000**
+> **Iterations Per World: 5000 | Checksum: 7880000**
 >| World Size | Small World | Medium World | Large World |
 >|---------------|--------------|-------------|------------|
 >|               | Small World | Medium World | Large World |
